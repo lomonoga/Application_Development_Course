@@ -1,10 +1,11 @@
+from typing import List
+from uuid import UUID
+
+from schemas import OrderItemCreate, OrderItemUpdate
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import joinedload
-from uuid import UUID
-from typing import List
 from tables import OrderItem
-from schemas import OrderItemCreate, OrderItemUpdate
 
 
 class OrderItemRepository:
@@ -30,14 +31,16 @@ class OrderItemRepository:
             order_id=order_item_data.order_id,
             product_id=order_item_data.product_id,
             quantity=order_item_data.quantity,
-            unit_price=order_item_data.unit_price
+            unit_price=order_item_data.unit_price,
         )
         self.session.add(order_item)
         await self.session.commit()
         await self.session.refresh(order_item)
         return order_item
 
-    async def update(self, order_item_id: UUID, order_item_data: OrderItemUpdate) -> OrderItem:
+    async def update(
+        self, order_item_id: UUID, order_item_data: OrderItemUpdate
+    ) -> OrderItem:
         order_item = await self.session.get(OrderItem, order_item_id)
         if not order_item:
             return None

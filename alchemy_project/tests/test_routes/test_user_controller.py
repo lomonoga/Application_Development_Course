@@ -1,14 +1,15 @@
-import pytest
 from unittest.mock import Mock
 from uuid import UUID
-from polyfactory.factories.pydantic_factory import ModelFactory
-from litestar.status_codes import HTTP_200_OK, HTTP_201_CREATED, HTTP_204_NO_CONTENT
-from litestar.di import Provide
-from litestar.testing import create_test_client
 
+import pytest
+from litestar.di import Provide
+from litestar.status_codes import (HTTP_200_OK, HTTP_201_CREATED,
+                                   HTTP_204_NO_CONTENT)
+from litestar.testing import create_test_client
+from polyfactory.factories.pydantic_factory import ModelFactory
+from schemas import UserCreate, UserResponse, UserUpdate
 from user_controller import UserController
 from user_service import UserService
-from schemas import UserCreate, UserUpdate, UserResponse
 
 
 class UserCreateFactory(ModelFactory[UserCreate]):
@@ -79,8 +80,10 @@ async def test_get_user_by_id(user_response: UserResponse):
     mock_service._mock_get_by_id.return_value = user_obj
 
     with create_test_client(
-            route_handlers=[UserController],
-            dependencies={"user_service": Provide(lambda: mock_service, sync_to_thread=False)}
+        route_handlers=[UserController],
+        dependencies={
+            "user_service": Provide(lambda: mock_service, sync_to_thread=False)
+        },
     ) as client:
         response = client.get(f"/users/get_user/{user_response.id}")
         assert response.status_code == HTTP_200_OK
@@ -95,8 +98,10 @@ async def test_get_user_by_id_not_found():
     mock_service._mock_get_by_id.return_value = None
 
     with create_test_client(
-            route_handlers=[UserController],
-            dependencies={"user_service": Provide(lambda: mock_service, sync_to_thread=False)}
+        route_handlers=[UserController],
+        dependencies={
+            "user_service": Provide(lambda: mock_service, sync_to_thread=False)
+        },
     ) as client:
         response = client.get(f"/users/get_user/{uuid4()}")
         assert response.status_code == 404
@@ -115,8 +120,10 @@ async def test_get_all_users(user_response: UserResponse):
     mock_service._mock_get_total_count.return_value = 1
 
     with create_test_client(
-            route_handlers=[UserController],
-            dependencies={"user_service": Provide(lambda: mock_service, sync_to_thread=False)}
+        route_handlers=[UserController],
+        dependencies={
+            "user_service": Provide(lambda: mock_service, sync_to_thread=False)
+        },
     ) as client:
         response = client.get("/users/get_all_users?count=10&page=1")
         assert response.status_code == HTTP_200_OK
@@ -143,8 +150,10 @@ async def test_get_all_users_default_pagination(user_response: UserResponse):
     mock_service._mock_get_total_count.return_value = 1
 
     with create_test_client(
-            route_handlers=[UserController],
-            dependencies={"user_service": Provide(lambda: mock_service, sync_to_thread=False)}
+        route_handlers=[UserController],
+        dependencies={
+            "user_service": Provide(lambda: mock_service, sync_to_thread=False)
+        },
     ) as client:
         response = client.get("/users/get_all_users")
         assert response.status_code == HTTP_200_OK
@@ -161,8 +170,10 @@ async def test_create_user(user_create: UserCreate, user_response: UserResponse)
     mock_service._mock_create.return_value = user_obj
 
     with create_test_client(
-            route_handlers=[UserController],
-            dependencies={"user_service": Provide(lambda: mock_service, sync_to_thread=False)}
+        route_handlers=[UserController],
+        dependencies={
+            "user_service": Provide(lambda: mock_service, sync_to_thread=False)
+        },
     ) as client:
         response = client.post("/users/create_user", json=user_create.model_dump())
         assert response.status_code == HTTP_201_CREATED
@@ -180,12 +191,13 @@ async def test_update_user(user_response: UserResponse, user_update: UserUpdate)
     mock_service._mock_update.return_value = user_obj
 
     with create_test_client(
-            route_handlers=[UserController],
-            dependencies={"user_service": Provide(lambda: mock_service, sync_to_thread=False)}
+        route_handlers=[UserController],
+        dependencies={
+            "user_service": Provide(lambda: mock_service, sync_to_thread=False)
+        },
     ) as client:
         response = client.put(
-            f"/users/update_user/{user_response.id}",
-            json=user_update.model_dump()
+            f"/users/update_user/{user_response.id}", json=user_update.model_dump()
         )
         assert response.status_code == HTTP_200_OK
         assert response.json()["id"] == str(user_response.id)
@@ -199,10 +211,14 @@ async def test_update_user_not_found(user_update: UserUpdate):
     mock_service._mock_update.return_value = None
 
     with create_test_client(
-            route_handlers=[UserController],
-            dependencies={"user_service": Provide(lambda: mock_service, sync_to_thread=False)}
+        route_handlers=[UserController],
+        dependencies={
+            "user_service": Provide(lambda: mock_service, sync_to_thread=False)
+        },
     ) as client:
-        response = client.put(f"/users/update_user/{uuid4()}", json=user_update.model_dump())
+        response = client.put(
+            f"/users/update_user/{uuid4()}", json=user_update.model_dump()
+        )
         assert response.status_code == 404
 
 
@@ -218,8 +234,10 @@ async def test_delete_user(user_response: UserResponse):
     mock_service._mock_delete.return_value = True
 
     with create_test_client(
-            route_handlers=[UserController],
-            dependencies={"user_service": Provide(lambda: mock_service, sync_to_thread=False)}
+        route_handlers=[UserController],
+        dependencies={
+            "user_service": Provide(lambda: mock_service, sync_to_thread=False)
+        },
     ) as client:
         response = client.delete(f"/users/delete_user/{user_response.id}")
         assert response.status_code == HTTP_204_NO_CONTENT

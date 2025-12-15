@@ -1,14 +1,15 @@
-import pytest
 from unittest.mock import Mock
 from uuid import UUID
-from polyfactory.factories.pydantic_factory import ModelFactory
-from litestar.status_codes import HTTP_200_OK, HTTP_201_CREATED, HTTP_204_NO_CONTENT
-from litestar.di import Provide
-from litestar.testing import create_test_client
 
+import pytest
+from litestar.di import Provide
+from litestar.status_codes import (HTTP_200_OK, HTTP_201_CREATED,
+                                   HTTP_204_NO_CONTENT)
+from litestar.testing import create_test_client
+from polyfactory.factories.pydantic_factory import ModelFactory
 from product_controller import ProductController
 from product_service import ProductService
-from schemas import ProductCreate, ProductUpdate, ProductResponse
+from schemas import ProductCreate, ProductResponse, ProductUpdate
 
 
 class ProductCreateFactory(ModelFactory[ProductCreate]):
@@ -77,8 +78,10 @@ async def test_get_product_by_id(product_response: ProductResponse):
     mock_service._mock_get_by_id.return_value = product_response
 
     with create_test_client(
-            route_handlers=[ProductController],
-            dependencies={"product_service": Provide(lambda: mock_service, sync_to_thread=False)}
+        route_handlers=[ProductController],
+        dependencies={
+            "product_service": Provide(lambda: mock_service, sync_to_thread=False)
+        },
     ) as client:
         response = client.get(f"/products/get_product/{product_response.id}")
         assert response.status_code == HTTP_200_OK
@@ -92,11 +95,16 @@ async def test_get_product_by_id_not_found():
     mock_service = MockProductService()
 
     from litestar.exceptions import NotFoundException
-    mock_service._mock_get_by_id.side_effect = NotFoundException(detail="Product not found")
+
+    mock_service._mock_get_by_id.side_effect = NotFoundException(
+        detail="Product not found"
+    )
 
     with create_test_client(
-            route_handlers=[ProductController],
-            dependencies={"product_service": Provide(lambda: mock_service, sync_to_thread=False)}
+        route_handlers=[ProductController],
+        dependencies={
+            "product_service": Provide(lambda: mock_service, sync_to_thread=False)
+        },
     ) as client:
         response = client.get(f"/products/get_product/{uuid4()}")
         assert response.status_code == 404
@@ -111,8 +119,10 @@ async def test_get_all_products(product_response: ProductResponse):
     mock_service._mock_get_total_count.return_value = 1
 
     with create_test_client(
-            route_handlers=[ProductController],
-            dependencies={"product_service": Provide(lambda: mock_service, sync_to_thread=False)}
+        route_handlers=[ProductController],
+        dependencies={
+            "product_service": Provide(lambda: mock_service, sync_to_thread=False)
+        },
     ) as client:
         response = client.get("/products/get_all_products?count=10&page=1")
         assert response.status_code == HTTP_200_OK
@@ -132,8 +142,10 @@ async def test_get_all_products_with_filters(product_response: ProductResponse):
     mock_service._mock_get_total_count.return_value = 1
 
     with create_test_client(
-            route_handlers=[ProductController],
-            dependencies={"product_service": Provide(lambda: mock_service, sync_to_thread=False)}
+        route_handlers=[ProductController],
+        dependencies={
+            "product_service": Provide(lambda: mock_service, sync_to_thread=False)
+        },
     ) as client:
         response = client.get(
             "/products/get_all_products?"
@@ -152,33 +164,43 @@ async def test_get_all_products_with_filters(product_response: ProductResponse):
 
 
 @pytest.mark.asyncio
-async def test_create_product(product_create: ProductCreate, product_response: ProductResponse):
+async def test_create_product(
+    product_create: ProductCreate, product_response: ProductResponse
+):
     mock_service = MockProductService()
 
     mock_service._mock_create.return_value = product_response
 
     with create_test_client(
-            route_handlers=[ProductController],
-            dependencies={"product_service": Provide(lambda: mock_service, sync_to_thread=False)}
+        route_handlers=[ProductController],
+        dependencies={
+            "product_service": Provide(lambda: mock_service, sync_to_thread=False)
+        },
     ) as client:
-        response = client.post("/products/create_product", json=product_create.model_dump())
+        response = client.post(
+            "/products/create_product", json=product_create.model_dump()
+        )
         assert response.status_code == HTTP_201_CREATED
         assert response.json()["name"] == product_response.name
 
 
 @pytest.mark.asyncio
-async def test_update_product(product_response: ProductResponse, product_update: ProductUpdate):
+async def test_update_product(
+    product_response: ProductResponse, product_update: ProductUpdate
+):
     mock_service = MockProductService()
 
     mock_service._mock_update.return_value = product_response
 
     with create_test_client(
-            route_handlers=[ProductController],
-            dependencies={"product_service": Provide(lambda: mock_service, sync_to_thread=False)}
+        route_handlers=[ProductController],
+        dependencies={
+            "product_service": Provide(lambda: mock_service, sync_to_thread=False)
+        },
     ) as client:
         response = client.put(
             f"/products/update_product/{product_response.id}",
-            json=product_update.model_dump()
+            json=product_update.model_dump(),
         )
         assert response.status_code == HTTP_200_OK
         assert response.json()["id"] == str(product_response.id)
@@ -191,13 +213,20 @@ async def test_update_product_not_found(product_update: ProductUpdate):
     mock_service = MockProductService()
 
     from litestar.exceptions import NotFoundException
-    mock_service._mock_update.side_effect = NotFoundException(detail="Product not found")
+
+    mock_service._mock_update.side_effect = NotFoundException(
+        detail="Product not found"
+    )
 
     with create_test_client(
-            route_handlers=[ProductController],
-            dependencies={"product_service": Provide(lambda: mock_service, sync_to_thread=False)}
+        route_handlers=[ProductController],
+        dependencies={
+            "product_service": Provide(lambda: mock_service, sync_to_thread=False)
+        },
     ) as client:
-        response = client.put(f"/products/update_product/{uuid4()}", json=product_update.model_dump())
+        response = client.put(
+            f"/products/update_product/{uuid4()}", json=product_update.model_dump()
+        )
         assert response.status_code == 404
 
 
@@ -215,8 +244,10 @@ async def test_delete_product(product_response: ProductResponse):
     mock_service._mock_delete.side_effect = delete_side_effect
 
     with create_test_client(
-            route_handlers=[ProductController],
-            dependencies={"product_service": Provide(lambda: mock_service, sync_to_thread=False)}
+        route_handlers=[ProductController],
+        dependencies={
+            "product_service": Provide(lambda: mock_service, sync_to_thread=False)
+        },
     ) as client:
         response = client.delete(f"/products/delete_product/{product_response.id}")
         assert response.status_code == HTTP_204_NO_CONTENT
@@ -229,11 +260,16 @@ async def test_delete_product_not_found():
     mock_service = MockProductService()
 
     from litestar.exceptions import NotFoundException
-    mock_service._mock_delete.side_effect = NotFoundException(detail="Product not found")
+
+    mock_service._mock_delete.side_effect = NotFoundException(
+        detail="Product not found"
+    )
 
     with create_test_client(
-            route_handlers=[ProductController],
-            dependencies={"product_service": Provide(lambda: mock_service, sync_to_thread=False)}
+        route_handlers=[ProductController],
+        dependencies={
+            "product_service": Provide(lambda: mock_service, sync_to_thread=False)
+        },
     ) as client:
         response = client.delete(f"/products/delete_product/{uuid4()}")
         assert response.status_code == 404

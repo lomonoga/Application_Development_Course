@@ -1,7 +1,8 @@
-from pydantic import BaseModel, Field
-from uuid import UUID
 from datetime import datetime
-from typing import Optional, List
+from typing import List, Optional
+from uuid import UUID
+
+from pydantic import BaseModel, Field
 
 
 class UserBase(BaseModel):
@@ -121,7 +122,7 @@ class OrderItemResponse(OrderItemBase):
 class OrderBase(BaseModel):
     user_id: UUID
     delivery_address_id: UUID
-    status: str = Field(default='pending', max_length=20)
+    status: str = Field(default="pending", max_length=20)
 
 
 class OrderCreate(OrderBase):

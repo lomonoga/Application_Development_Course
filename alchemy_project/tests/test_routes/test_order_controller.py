@@ -1,15 +1,16 @@
-import pytest
+from datetime import datetime
 from unittest.mock import Mock
 from uuid import UUID
-from datetime import datetime
-from polyfactory.factories.pydantic_factory import ModelFactory
-from litestar.status_codes import HTTP_200_OK, HTTP_201_CREATED, HTTP_204_NO_CONTENT
-from litestar.di import Provide
-from litestar.testing import create_test_client
 
+import pytest
+from litestar.di import Provide
+from litestar.status_codes import (HTTP_200_OK, HTTP_201_CREATED,
+                                   HTTP_204_NO_CONTENT)
+from litestar.testing import create_test_client
 from order_controller import OrderController
 from order_service import OrderService
-from schemas import OrderCreate, OrderUpdate, OrderResponse, OrderItemBase
+from polyfactory.factories.pydantic_factory import ModelFactory
+from schemas import OrderCreate, OrderItemBase, OrderResponse, OrderUpdate
 
 
 class OrderCreateFactory(ModelFactory[OrderCreate]):
@@ -93,8 +94,10 @@ async def test_get_order_by_id(order_response: OrderResponse):
     mock_service._mock_get_by_id.return_value = order_response
 
     with create_test_client(
-            route_handlers=[OrderController],
-            dependencies={"order_service": Provide(lambda: mock_service, sync_to_thread=False)}
+        route_handlers=[OrderController],
+        dependencies={
+            "order_service": Provide(lambda: mock_service, sync_to_thread=False)
+        },
     ) as client:
         response = client.get(f"/orders/get_order/{order_response.id}")
         assert response.status_code == HTTP_200_OK
@@ -108,11 +111,16 @@ async def test_get_order_by_id_not_found():
     mock_service = MockOrderService()
 
     from litestar.exceptions import NotFoundException
-    mock_service._mock_get_by_id.side_effect = NotFoundException(detail="Order not found")
+
+    mock_service._mock_get_by_id.side_effect = NotFoundException(
+        detail="Order not found"
+    )
 
     with create_test_client(
-            route_handlers=[OrderController],
-            dependencies={"order_service": Provide(lambda: mock_service, sync_to_thread=False)}
+        route_handlers=[OrderController],
+        dependencies={
+            "order_service": Provide(lambda: mock_service, sync_to_thread=False)
+        },
     ) as client:
         response = client.get(f"/orders/get_order/{uuid4()}")
         assert response.status_code == 404
@@ -126,10 +134,14 @@ async def test_get_orders_by_user_id(order_response: OrderResponse):
     mock_service._mock_get_total_count.return_value = 1
 
     with create_test_client(
-            route_handlers=[OrderController],
-            dependencies={"order_service": Provide(lambda: mock_service, sync_to_thread=False)}
+        route_handlers=[OrderController],
+        dependencies={
+            "order_service": Provide(lambda: mock_service, sync_to_thread=False)
+        },
     ) as client:
-        response = client.get(f"/orders/get_user_orders/{order_response.user_id}?count=10&page=1")
+        response = client.get(
+            f"/orders/get_user_orders/{order_response.user_id}?count=10&page=1"
+        )
         assert response.status_code == HTTP_200_OK
         data = response.json()
         assert data["total_count"] == 1
@@ -146,8 +158,10 @@ async def test_get_all_orders(order_response: OrderResponse):
     mock_service._mock_get_total_count.return_value = 1
 
     with create_test_client(
-            route_handlers=[OrderController],
-            dependencies={"order_service": Provide(lambda: mock_service, sync_to_thread=False)}
+        route_handlers=[OrderController],
+        dependencies={
+            "order_service": Provide(lambda: mock_service, sync_to_thread=False)
+        },
     ) as client:
         response = client.get("/orders/get_all_orders?count=10&page=1")
         assert response.status_code == HTTP_200_OK
@@ -166,8 +180,10 @@ async def test_get_all_orders_with_filters(order_response: OrderResponse):
     mock_service._mock_get_total_count.return_value = 1
 
     with create_test_client(
-            route_handlers=[OrderController],
-            dependencies={"order_service": Provide(lambda: mock_service, sync_to_thread=False)}
+        route_handlers=[OrderController],
+        dependencies={
+            "order_service": Provide(lambda: mock_service, sync_to_thread=False)
+        },
     ) as client:
         response = client.get(
             f"/orders/get_all_orders?"
@@ -195,8 +211,10 @@ async def test_create_order(order_create: OrderCreate, order_response: OrderResp
     mock_service._mock_create.return_value = order_response
 
     with create_test_client(
-            route_handlers=[OrderController],
-            dependencies={"order_service": Provide(lambda: mock_service, sync_to_thread=False)}
+        route_handlers=[OrderController],
+        dependencies={
+            "order_service": Provide(lambda: mock_service, sync_to_thread=False)
+        },
     ) as client:
         request_data = order_create.model_dump()
         request_data["user_id"] = str(request_data["user_id"])
@@ -214,13 +232,16 @@ async def test_create_order_validation_error(order_create: OrderCreate):
     mock_service = MockOrderService()
 
     from litestar.exceptions import ValidationException
+
     mock_service._mock_validate_order_items.side_effect = ValidationException(
         detail="Order must contain at least one item"
     )
 
     with create_test_client(
-            route_handlers=[OrderController],
-            dependencies={"order_service": Provide(lambda: mock_service, sync_to_thread=False)}
+        route_handlers=[OrderController],
+        dependencies={
+            "order_service": Provide(lambda: mock_service, sync_to_thread=False)
+        },
     ) as client:
         request_data = order_create.model_dump()
         request_data["user_id"] = str(request_data["user_id"])
@@ -240,12 +261,13 @@ async def test_update_order(order_response: OrderResponse, order_update: OrderUp
     mock_service._mock_update.return_value = order_response
 
     with create_test_client(
-            route_handlers=[OrderController],
-            dependencies={"order_service": Provide(lambda: mock_service, sync_to_thread=False)}
+        route_handlers=[OrderController],
+        dependencies={
+            "order_service": Provide(lambda: mock_service, sync_to_thread=False)
+        },
     ) as client:
         response = client.put(
-            f"/orders/update_order/{order_response.id}",
-            json=order_update.model_dump()
+            f"/orders/update_order/{order_response.id}", json=order_update.model_dump()
         )
         assert response.status_code == HTTP_200_OK
         assert response.json()["id"] == str(order_response.id)
@@ -258,13 +280,18 @@ async def test_update_order_not_found(order_update: OrderUpdate):
     mock_service = MockOrderService()
 
     from litestar.exceptions import NotFoundException
+
     mock_service._mock_update.side_effect = NotFoundException(detail="Order not found")
 
     with create_test_client(
-            route_handlers=[OrderController],
-            dependencies={"order_service": Provide(lambda: mock_service, sync_to_thread=False)}
+        route_handlers=[OrderController],
+        dependencies={
+            "order_service": Provide(lambda: mock_service, sync_to_thread=False)
+        },
     ) as client:
-        response = client.put(f"/orders/update_order/{uuid4()}", json=order_update.model_dump())
+        response = client.put(
+            f"/orders/update_order/{uuid4()}", json=order_update.model_dump()
+        )
         assert response.status_code == 404
 
 
@@ -275,8 +302,10 @@ async def test_delete_order(order_response: OrderResponse):
     mock_service._mock_delete.return_value = None
 
     with create_test_client(
-            route_handlers=[OrderController],
-            dependencies={"order_service": Provide(lambda: mock_service, sync_to_thread=False)}
+        route_handlers=[OrderController],
+        dependencies={
+            "order_service": Provide(lambda: mock_service, sync_to_thread=False)
+        },
     ) as client:
         response = client.delete(f"/orders/delete_order/{order_response.id}")
         assert response.status_code == HTTP_204_NO_CONTENT
@@ -289,11 +318,14 @@ async def test_delete_order_not_found():
     mock_service = MockOrderService()
 
     from litestar.exceptions import NotFoundException
+
     mock_service._mock_delete.side_effect = NotFoundException(detail="Order not found")
 
     with create_test_client(
-            route_handlers=[OrderController],
-            dependencies={"order_service": Provide(lambda: mock_service, sync_to_thread=False)}
+        route_handlers=[OrderController],
+        dependencies={
+            "order_service": Provide(lambda: mock_service, sync_to_thread=False)
+        },
     ) as client:
         response = client.delete(f"/orders/delete_order/{uuid4()}")
         assert response.status_code == 404

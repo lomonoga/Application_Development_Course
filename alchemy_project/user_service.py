@@ -1,7 +1,8 @@
 from uuid import UUID
-from user_repository import UserRepository
-from tables import User
+
 from schemas import UserCreate, UserUpdate
+from tables import User
+from user_repository import UserRepository
 
 
 class UserService:
@@ -11,7 +12,9 @@ class UserService:
     async def get_by_id(self, user_id: UUID) -> User | None:
         return await self.user_repository.get_by_id(user_id)
 
-    async def get_by_filter(self, count: int = 10, page: int = 1, **kwargs) -> list[User]:
+    async def get_by_filter(
+        self, count: int = 10, page: int = 1, **kwargs
+    ) -> list[User]:
         return await self.user_repository.get_by_filter(count, page, **kwargs)
 
     async def get_total_count(self, **kwargs) -> int:

@@ -1,9 +1,10 @@
+from typing import List, Optional
+from uuid import UUID
+
+from schemas import ProductCreate, ProductUpdate
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
-from uuid import UUID
-from typing import List, Optional
 from tables import Product
-from schemas import ProductCreate, ProductUpdate
 
 
 class ProductRepository:
@@ -11,21 +12,25 @@ class ProductRepository:
         self.session = session
 
     async def get_by_id(self, product_id: UUID) -> Optional[Product]:
-        result = await self.session.execute(select(Product).where(Product.id == product_id))
+        result = await self.session.execute(
+            select(Product).where(Product.id == product_id)
+        )
         return result.scalar_one_or_none()
 
-    async def get_by_filter(self, count: int = 10, page: int = 1, **kwargs) -> List[Product]:
+    async def get_by_filter(
+        self, count: int = 10, page: int = 1, **kwargs
+    ) -> List[Product]:
         offset = (page - 1) * count
         query = select(Product)
 
         if kwargs:
             for key, value in kwargs.items():
                 if hasattr(Product, key):
-                    if key == 'price_min':
+                    if key == "price_min":
                         query = query.where(Product.price >= value)
-                    elif key == 'price_max':
+                    elif key == "price_max":
                         query = query.where(Product.price <= value)
-                    elif key == 'name_query':
+                    elif key == "name_query":
                         query = query.where(Product.name.ilike(f"%{value}%"))
                     else:
                         query = query.where(getattr(Product, key) == value)
@@ -37,10 +42,7 @@ class ProductRepository:
     async def get_in_stock(self, count: int = 10, page: int = 1) -> List[Product]:
         offset = (page - 1) * count
         result = await self.session.execute(
-            select(Product)
-            .where(Product.in_stock == True)
-            .offset(offset)
-            .limit(count)
+            select(Product).where(Product.in_stock == True).offset(offset).limit(count)
         )
         return list(result.scalars().all())
 
@@ -50,11 +52,11 @@ class ProductRepository:
         if kwargs:
             for key, value in kwargs.items():
                 if hasattr(Product, key):
-                    if key == 'price_min':
+                    if key == "price_min":
                         query = query.where(Product.price >= value)
-                    elif key == 'price_max':
+                    elif key == "price_max":
                         query = query.where(Product.price <= value)
-                    elif key == 'name_query':
+                    elif key == "name_query":
                         query = query.where(Product.name.ilike(f"%{value}%"))
                     else:
                         query = query.where(getattr(Product, key) == value)
@@ -69,7 +71,7 @@ class ProductRepository:
                 description=product_data.description,
                 price=product_data.price,
                 category=product_data.category,
-                in_stock=product_data.in_stock
+                in_stock=product_data.in_stock,
             )
             self.session.add(product)
             await self.session.commit()
@@ -79,7 +81,9 @@ class ProductRepository:
             await self.session.rollback()
             raise e
 
-    async def update(self, product_id: UUID, product_data: ProductUpdate) -> Optional[Product]:
+    async def update(
+        self, product_id: UUID, product_data: ProductUpdate
+    ) -> Optional[Product]:
         try:
             product = await self.get_by_id(product_id)
             if not product:

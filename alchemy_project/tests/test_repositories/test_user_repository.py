@@ -1,8 +1,7 @@
 import pytest
-
-from user_repository import UserRepository
 from schemas import UserCreate, UserUpdate
 from tables import User
+from user_repository import UserRepository
 
 
 class TestUserRepository:
@@ -14,7 +13,7 @@ class TestUserRepository:
         user_data = UserCreate(
             email="test@example.com",
             username="john_doe",
-            description="Test user description"
+            description="Test user description",
         )
 
         user = await user_repository.create(user_data)
@@ -30,7 +29,7 @@ class TestUserRepository:
         user_data = UserCreate(
             email="getbyid@example.com",
             username="getbyid_user",
-            description="Test user"
+            description="Test user",
         )
         created_user = await user_repository.create(user_data)
 
@@ -45,6 +44,7 @@ class TestUserRepository:
     async def test_get_by_id_not_found(self, user_repository: UserRepository):
         """Тест поиска несуществующего пользователя по ID"""
         import uuid
+
         random_id = uuid.uuid4()
 
         user = await user_repository.get_by_id(random_id)
@@ -59,7 +59,7 @@ class TestUserRepository:
             user_data = UserCreate(
                 email=f"filter{i}@example.com",
                 username=f"user_filter{i}",
-                description=f"User {i} for filter test"
+                description=f"User {i} for filter test",
             )
             await user_repository.create(user_data)
 
@@ -72,19 +72,19 @@ class TestUserRepository:
         assert len(users_page2) >= 2
 
     @pytest.mark.asyncio
-    async def test_get_by_filter_with_email_filter(self, user_repository: UserRepository):
+    async def test_get_by_filter_with_email_filter(
+        self, user_repository: UserRepository
+    ):
         """Тест фильтрации по email"""
         user1_data = UserCreate(
             email="specific@example.com",
             username="specific_user",
-            description="Specific user"
+            description="Specific user",
         )
         await user_repository.create(user1_data)
 
         user2_data = UserCreate(
-            email="other@example.com",
-            username="other_user",
-            description="Other user"
+            email="other@example.com", username="other_user", description="Other user"
         )
         await user_repository.create(user2_data)
 
@@ -97,12 +97,14 @@ class TestUserRepository:
         assert filtered_users[0].username == "specific_user"
 
     @pytest.mark.asyncio
-    async def test_get_by_filter_with_username_filter(self, user_repository: UserRepository):
+    async def test_get_by_filter_with_username_filter(
+        self, user_repository: UserRepository
+    ):
         """Тест фильтрации по username"""
         user_data = UserCreate(
             email="filter_username@example.com",
             username="unique_filter_name",
-            description="User for username filter"
+            description="User for username filter",
         )
         await user_repository.create(user_data)
 
@@ -130,7 +132,7 @@ class TestUserRepository:
             user_data = UserCreate(
                 email=f"count{i}@example.com",
                 username=f"user_count{i}",
-                description=f"User {i} for count test"
+                description=f"User {i} for count test",
             )
             await user_repository.create(user_data)
 
@@ -145,14 +147,14 @@ class TestUserRepository:
         user1_data = UserCreate(
             email="filtered_count@example.com",
             username="user_filtered",
-            description="Filtered user"
+            description="Filtered user",
         )
         await user_repository.create(user1_data)
 
         user2_data = UserCreate(
             email="other_count@example.com",
             username="user_other",
-            description="Other user"
+            description="Other user",
         )
         await user_repository.create(user2_data)
 
@@ -169,7 +171,7 @@ class TestUserRepository:
         user_data = UserCreate(
             email="update_test@example.com",
             username="update_user",
-            description="Original description"
+            description="Original description",
         )
         created_user = await user_repository.create(user_data)
 
@@ -186,9 +188,7 @@ class TestUserRepository:
     async def test_update_user_partial(self, user_repository: UserRepository):
         """Тест частичного обновления (только одно поле)"""
         user_data = UserCreate(
-            email="partial@example.com",
-            username="partial_user",
-            description="Original"
+            email="partial@example.com", username="partial_user", description="Original"
         )
         created_user = await user_repository.create(user_data)
 
@@ -203,6 +203,7 @@ class TestUserRepository:
     async def test_update_user_not_found(self, user_repository: UserRepository):
         """Тест обновления несуществующего пользователя"""
         import uuid
+
         random_id = uuid.uuid4()
 
         update_data = UserUpdate(description="Should not update")
@@ -216,7 +217,7 @@ class TestUserRepository:
         user_data = UserCreate(
             email="delete@example.com",
             username="delete_user",
-            description="Will be deleted"
+            description="Will be deleted",
         )
         created_user = await user_repository.create(user_data)
 
@@ -231,6 +232,7 @@ class TestUserRepository:
     async def test_delete_user_not_found(self, user_repository: UserRepository):
         """Тест удаления несуществующего пользователя"""
         import uuid
+
         random_id = uuid.uuid4()
 
         deleted = await user_repository.delete(random_id)
@@ -243,7 +245,7 @@ class TestUserRepository:
         user_data = UserCreate(
             email="unique_email@example.com",
             username="email_user",
-            description="User for email test"
+            description="User for email test",
         )
         await user_repository.create(user_data)
 
@@ -258,9 +260,7 @@ class TestUserRepository:
     async def test_full_crud_cycle(self, user_repository: UserRepository):
         """Полный тест цикла создания, чтения, обновления, удаления"""
         user_data = UserCreate(
-            email="crud@example.com",
-            username="crud_user",
-            description="CRUD test user"
+            email="crud@example.com", username="crud_user", description="CRUD test user"
         )
         created_user = await user_repository.create(user_data)
         assert created_user.id is not None

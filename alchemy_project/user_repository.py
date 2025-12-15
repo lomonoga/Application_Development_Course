@@ -1,8 +1,9 @@
+from uuid import UUID
+
+from schemas import UserCreate, UserUpdate
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
-from uuid import UUID
 from tables import User
-from schemas import UserCreate, UserUpdate
 
 
 class UserRepository:
@@ -13,7 +14,9 @@ class UserRepository:
         result = await self.session.execute(select(User).where(User.id == user_id))
         return result.scalar_one_or_none()
 
-    async def get_by_filter(self, count: int = 10, page: int = 1, **kwargs) -> list[User]:
+    async def get_by_filter(
+        self, count: int = 10, page: int = 1, **kwargs
+    ) -> list[User]:
         offset = (page - 1) * count
         query = select(User)
 
@@ -41,7 +44,7 @@ class UserRepository:
         user = User(
             username=user_data.username,
             email=user_data.email,
-            description=user_data.description
+            description=user_data.description,
         )
         self.session.add(user)
         await self.session.commit()

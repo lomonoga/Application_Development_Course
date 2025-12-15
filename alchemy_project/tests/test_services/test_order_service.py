@@ -1,8 +1,8 @@
-import pytest
-from unittest.mock import Mock, AsyncMock
-from uuid import uuid4
 from datetime import datetime
+from unittest.mock import AsyncMock, Mock
+from uuid import uuid4
 
+import pytest
 from order_service import OrderService
 from schemas import OrderCreate, OrderItemBase, OrderUpdate
 
@@ -19,7 +19,7 @@ class TestOrderService:
             total_amount=100.0,
             created_at=datetime.now(),
             updated_at=datetime.now(),
-            items=[]
+            items=[],
         )
         mock_repo.get_by_id.return_value = mock_order
 
@@ -41,7 +41,7 @@ class TestOrderService:
                 total_amount=100.0,
                 created_at=datetime.now(),
                 updated_at=datetime.now(),
-                items=[]
+                items=[],
             )
         ]
         mock_repo.get_by_user_id.return_value = mock_orders
@@ -65,7 +65,7 @@ class TestOrderService:
                 total_amount=200.0,
                 created_at=datetime.now(),
                 updated_at=datetime.now(),
-                items=[]
+                items=[],
             )
         ]
         mock_repo.get_by_filter.return_value = mock_orders
@@ -74,7 +74,9 @@ class TestOrderService:
         result = await service.get_by_filter(status="completed", count=5, page=2)
 
         assert len(result) == 1
-        mock_repo.get_by_filter.assert_called_once_with(count=5, page=2, status="completed")
+        mock_repo.get_by_filter.assert_called_once_with(
+            count=5, page=2, status="completed"
+        )
 
     @pytest.mark.asyncio
     async def test_get_total_count(self):
@@ -98,7 +100,7 @@ class TestOrderService:
             total_amount=150.0,
             created_at=datetime.now(),
             updated_at=datetime.now(),
-            items=[]
+            items=[],
         )
         mock_repo.create.return_value = mock_order
 
@@ -106,13 +108,7 @@ class TestOrderService:
         order_data = OrderCreate(
             user_id=uuid4(),
             delivery_address_id=uuid4(),
-            items=[
-                OrderItemBase(
-                    product_id=uuid4(),
-                    quantity=2,
-                    unit_price=75.0
-                )
-            ]
+            items=[OrderItemBase(product_id=uuid4(), quantity=2, unit_price=75.0)],
         )
         result = await service.create(order_data)
 
@@ -131,7 +127,7 @@ class TestOrderService:
             total_amount=100.0,
             created_at=datetime.now(),
             updated_at=datetime.now(),
-            items=[]
+            items=[],
         )
         mock_repo.update.return_value = mock_order
 
@@ -157,13 +153,7 @@ class TestOrderService:
     async def test_validate_order_items(self):
         service = OrderService(repository=AsyncMock())
 
-        items = [
-            OrderItemBase(
-                product_id=uuid4(),
-                quantity=1,
-                unit_price=50.0
-            )
-        ]
+        items = [OrderItemBase(product_id=uuid4(), quantity=1, unit_price=50.0)]
         result = await service.validate_order_items(items)
 
         assert result is True

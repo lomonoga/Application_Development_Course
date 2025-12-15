@@ -1,8 +1,9 @@
-from uuid import UUID
 from typing import List
-from order_item_repository import OrderItemRepository
-from schemas import OrderItemCreate, OrderItemUpdate, OrderItemResponse
+from uuid import UUID
+
 from litestar.exceptions import NotFoundException
+from order_item_repository import OrderItemRepository
+from schemas import OrderItemCreate, OrderItemResponse, OrderItemUpdate
 
 
 class OrderItemService:
@@ -25,23 +26,27 @@ class OrderItemService:
         return OrderItemResponse.model_validate(order_item)
 
     async def update(
-            self,
-            order_item_id: UUID,
-            order_item_data: OrderItemUpdate
+        self, order_item_id: UUID, order_item_data: OrderItemUpdate
     ) -> OrderItemResponse:
         """Обновить товар в заказе"""
         order_item = await self.repository.update(order_item_id, order_item_data)
         if not order_item:
-            raise NotFoundException(detail=f"Order item with ID {order_item_id} not found")
+            raise NotFoundException(
+                detail=f"Order item with ID {order_item_id} not found"
+            )
         return OrderItemResponse.model_validate(order_item)
 
     async def delete(self, order_item_id: UUID) -> None:
         """Удалить товар из заказа"""
         success = await self.repository.delete(order_item_id)
         if not success:
-            raise NotFoundException(detail=f"Order item with ID {order_item_id} not found")
+            raise NotFoundException(
+                detail=f"Order item with ID {order_item_id} not found"
+            )
 
-    async def update_quantity(self, order_item_id: UUID, quantity: int) -> OrderItemResponse:
+    async def update_quantity(
+        self, order_item_id: UUID, quantity: int
+    ) -> OrderItemResponse:
         """Обновить количество товара в заказе"""
         if quantity <= 0:
             raise ValueError("Quantity must be greater than 0")

@@ -1,15 +1,18 @@
-from uuid import UUID
 from typing import List
-from order_repository import OrderRepository
-from schemas import OrderCreate, OrderUpdate, OrderResponse, OrderItemBase
+from uuid import UUID
+
 from litestar.exceptions import NotFoundException, ValidationException
+from order_repository import OrderRepository
+from schemas import OrderCreate, OrderItemBase, OrderResponse, OrderUpdate
 
 
 class OrderService:
     def __init__(self, repository: OrderRepository):
         self.repository = repository
 
-    async def get_by_id(self, order_id: UUID, include_relations: bool = True) -> OrderResponse:
+    async def get_by_id(
+        self, order_id: UUID, include_relations: bool = True
+    ) -> OrderResponse:
         """Получить заказ по ID"""
         order = await self.repository.get_by_id(order_id, include_relations)
         if not order:
@@ -17,20 +20,14 @@ class OrderService:
         return OrderResponse.model_validate(order)
 
     async def get_by_user_id(
-            self,
-            user_id: UUID,
-            count: int = 10,
-            page: int = 1
+        self, user_id: UUID, count: int = 10, page: int = 1
     ) -> List[OrderResponse]:
         """Получить заказы пользователя"""
         orders = await self.repository.get_by_user_id(user_id, count, page)
         return [OrderResponse.model_validate(order) for order in orders]
 
     async def get_by_filter(
-            self,
-            count: int = 10,
-            page: int = 1,
-            **kwargs
+        self, count: int = 10, page: int = 1, **kwargs
     ) -> List[OrderResponse]:
         """Получить заказы с фильтрацией"""
         orders = await self.repository.get_by_filter(count=count, page=page, **kwargs)

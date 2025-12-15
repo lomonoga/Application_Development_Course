@@ -1,28 +1,29 @@
 import os
+
+from address_controller import AddressController
+from address_repository import AddressRepository
+from address_service import AddressService
 from litestar import Litestar
 from litestar.config.cors import CORSConfig
 from litestar.di import Provide
 from litestar.openapi import OpenAPIConfig
-from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sessionmaker
-
-from user_controller import UserController
-from address_controller import AddressController
-from product_controller import ProductController
 from order_controller import OrderController
-
-from user_repository import UserRepository
-from address_repository import AddressRepository
-from product_repository import ProductRepository
-from order_repository import OrderRepository
 from order_item_repository import OrderItemRepository
-
-from user_service import UserService
-from address_service import AddressService
-from product_service import ProductService
-from order_service import OrderService
 from order_item_service import OrderItemService
+from order_repository import OrderRepository
+from order_service import OrderService
+from product_controller import ProductController
+from product_repository import ProductRepository
+from product_service import ProductService
+from sqlalchemy.ext.asyncio import (AsyncSession, async_sessionmaker,
+                                    create_async_engine)
+from user_controller import UserController
+from user_repository import UserRepository
+from user_service import UserService
 
-DATABASE_URL = os.getenv("DATABASE_URL", "postgresql+asyncpg://postgres:postgres@localhost:5432/postgres")
+DATABASE_URL = os.getenv(
+    "DATABASE_URL", "postgresql+asyncpg://postgres:postgres@localhost:5432/postgres"
+)
 
 engine = create_async_engine(DATABASE_URL, echo=True)
 async_session_factory = async_sessionmaker(
@@ -50,7 +51,9 @@ async def provide_address_repository(db_session: AsyncSession) -> AddressReposit
     return AddressRepository(db_session)
 
 
-async def provide_address_service(address_repository: AddressRepository) -> AddressService:
+async def provide_address_service(
+    address_repository: AddressRepository,
+) -> AddressService:
     return AddressService(address_repository)
 
 
@@ -58,7 +61,9 @@ async def provide_product_repository(db_session: AsyncSession) -> ProductReposit
     return ProductRepository(db_session)
 
 
-async def provide_product_service(product_repository: ProductRepository) -> ProductService:
+async def provide_product_service(
+    product_repository: ProductRepository,
+) -> ProductService:
     return ProductService(product_repository)
 
 
@@ -70,11 +75,15 @@ async def provide_order_service(order_repository: OrderRepository) -> OrderServi
     return OrderService(order_repository)
 
 
-async def provide_order_item_repository(db_session: AsyncSession) -> OrderItemRepository:
+async def provide_order_item_repository(
+    db_session: AsyncSession,
+) -> OrderItemRepository:
     return OrderItemRepository(db_session)
 
 
-async def provide_order_item_service(order_item_repository: OrderItemRepository) -> OrderItemService:
+async def provide_order_item_service(
+    order_item_repository: OrderItemRepository,
+) -> OrderItemService:
     return OrderItemService(order_item_repository)
 
 
@@ -90,28 +99,23 @@ app = Litestar(
         UserController,
         AddressController,
         ProductController,
-        OrderController
+        OrderController,
     ],
     dependencies={
         # DB session
         "db_session": Provide(provide_db_session),
-
         # User dependencies
         "user_repository": Provide(provide_user_repository),
         "user_service": Provide(provide_user_service),
-
         # Address dependencies
         "address_repository": Provide(provide_address_repository),
         "address_service": Provide(provide_address_service),
-
         # Product dependencies
         "product_repository": Provide(provide_product_repository),
         "product_service": Provide(provide_product_service),
-
         # Order dependencies
         "order_repository": Provide(provide_order_repository),
         "order_service": Provide(provide_order_service),
-
         # OrderItem dependencies
         "order_item_repository": Provide(provide_order_item_repository),
         "order_item_service": Provide(provide_order_item_service),
@@ -125,9 +129,12 @@ app = Litestar(
             {"name": "User Management", "description": "User management operations"},
             {"name": "Address Management", "description": "User address management"},
             {"name": "Product Management", "description": "Product catalog management"},
-            {"name": "Order Management", "description": "Order processing and management"}
-        ]
-    )
+            {
+                "name": "Order Management",
+                "description": "Order processing and management",
+            },
+        ],
+    ),
 )
 
 if __name__ == "__main__":

@@ -1,8 +1,8 @@
-import pytest
-from unittest.mock import Mock, AsyncMock
-from uuid import uuid4
 from datetime import datetime
+from unittest.mock import AsyncMock, Mock
+from uuid import uuid4
 
+import pytest
 from schemas import UserCreate, UserUpdate
 from user_service import UserService
 
@@ -17,7 +17,7 @@ class TestUserService:
             email="test@example.com",
             description="Test description",
             created_at=datetime.now(),
-            updated_at=datetime.now()
+            updated_at=datetime.now(),
         )
         mock_repo.get_by_id.return_value = mock_user
 
@@ -37,7 +37,7 @@ class TestUserService:
                 email="user1@example.com",
                 description="Desc1",
                 created_at=datetime.now(),
-                updated_at=datetime.now()
+                updated_at=datetime.now(),
             ),
             Mock(
                 id=uuid4(),
@@ -45,8 +45,8 @@ class TestUserService:
                 email="user2@example.com",
                 description="Desc2",
                 created_at=datetime.now(),
-                updated_at=datetime.now()
-            )
+                updated_at=datetime.now(),
+            ),
         ]
         mock_repo.get_by_filter.return_value = mock_users
 
@@ -76,15 +76,13 @@ class TestUserService:
             email="new@example.com",
             description="New user",
             created_at=datetime.now(),
-            updated_at=datetime.now()
+            updated_at=datetime.now(),
         )
         mock_repo.create.return_value = mock_user
 
         service = UserService(user_repository=mock_repo)
         user_data = UserCreate(
-            username="newuser",
-            email="new@example.com",
-            description="New user"
+            username="newuser", email="new@example.com", description="New user"
         )
         result = await service.create(user_data)
 
@@ -101,7 +99,7 @@ class TestUserService:
             email="updated@example.com",
             description="Updated",
             created_at=datetime.now(),
-            updated_at=datetime.now()
+            updated_at=datetime.now(),
         )
         mock_repo.update.return_value = mock_user
 

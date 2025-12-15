@@ -1,11 +1,13 @@
-import pytest
 import asyncio
-import sys
 import os
+import sys
 
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+import pytest
 
-from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine, async_sessionmaker
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+
+from sqlalchemy.ext.asyncio import (AsyncSession, async_sessionmaker,
+                                    create_async_engine)
 
 try:
     from base import Base
@@ -31,11 +33,7 @@ def event_loop():
 @pytest.fixture(scope="session")
 async def engine():
     """Создаем асинхронный движок для тестовой базы"""
-    engine = create_async_engine(
-        TEST_DATABASE_URL,
-        echo=True,
-        future=True
-    )
+    engine = create_async_engine(TEST_DATABASE_URL, echo=True, future=True)
 
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
@@ -52,9 +50,7 @@ async def engine():
 async def session(engine):
     """Создаем асинхронную сессию для тестов"""
     async_session = async_sessionmaker(
-        engine,
-        class_=AsyncSession,
-        expire_on_commit=False
+        engine, class_=AsyncSession, expire_on_commit=False
     )
 
     async with async_session() as session:
@@ -72,6 +68,7 @@ async def session(engine):
 async def user_repository(session):
     """Фикстура для репозитория пользователей"""
     from user_repository import UserRepository
+
     return UserRepository(session)
 
 
@@ -79,6 +76,7 @@ async def user_repository(session):
 async def product_repository(session):
     """Фикстура для репозитория продуктов"""
     from product_repository import ProductRepository
+
     return ProductRepository(session)
 
 
@@ -86,4 +84,5 @@ async def product_repository(session):
 async def order_repository(session):
     """Фикстура для репозитория заказов"""
     from order_repository import OrderRepository
+
     return OrderRepository(session)

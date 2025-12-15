@@ -1,8 +1,9 @@
-from uuid import UUID
 from typing import List, Optional
+from uuid import UUID
+
 from address_repository import AddressRepository
-from schemas import AddressCreate, AddressUpdate, AddressResponse
 from litestar.exceptions import NotFoundException
+from schemas import AddressCreate, AddressResponse, AddressUpdate
 
 
 class AddressService:
@@ -22,13 +23,12 @@ class AddressService:
         return [AddressResponse.model_validate(addr) for addr in addresses]
 
     async def get_by_filter(
-            self,
-            count: int = 10,
-            page: int = 1,
-            **kwargs
+        self, count: int = 10, page: int = 1, **kwargs
     ) -> List[AddressResponse]:
         """Получить адреса с фильтрацией"""
-        addresses = await self.repository.get_by_filter(count=count, page=page, **kwargs)
+        addresses = await self.repository.get_by_filter(
+            count=count, page=page, **kwargs
+        )
         return [AddressResponse.model_validate(addr) for addr in addresses]
 
     async def get_total_count(self, **kwargs) -> int:
@@ -40,7 +40,9 @@ class AddressService:
         address = await self.repository.create(address_data)
         return AddressResponse.model_validate(address)
 
-    async def update(self, address_id: UUID, address_data: AddressUpdate) -> AddressResponse:
+    async def update(
+        self, address_id: UUID, address_data: AddressUpdate
+    ) -> AddressResponse:
         """Обновить адрес"""
         address = await self.repository.update(address_id, address_data)
         if not address:

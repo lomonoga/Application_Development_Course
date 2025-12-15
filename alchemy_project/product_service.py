@@ -1,8 +1,9 @@
-from uuid import UUID
 from typing import List
-from product_repository import ProductRepository
-from schemas import ProductCreate, ProductUpdate, ProductResponse
+from uuid import UUID
+
 from litestar.exceptions import NotFoundException
+from product_repository import ProductRepository
+from schemas import ProductCreate, ProductResponse, ProductUpdate
 
 
 class ProductService:
@@ -17,10 +18,7 @@ class ProductService:
         return ProductResponse.model_validate(product)
 
     async def get_by_filter(
-            self,
-            count: int = 10,
-            page: int = 1,
-            **kwargs
+        self, count: int = 10, page: int = 1, **kwargs
     ) -> List[ProductResponse]:
         """Получить продукты с фильтрацией"""
         products = await self.repository.get_by_filter(count=count, page=page, **kwargs)
@@ -35,7 +33,9 @@ class ProductService:
         product = await self.repository.create(product_data)
         return ProductResponse.model_validate(product)
 
-    async def update(self, product_id: UUID, product_data: ProductUpdate) -> ProductResponse:
+    async def update(
+        self, product_id: UUID, product_data: ProductUpdate
+    ) -> ProductResponse:
         """Обновить продукт"""
         product = await self.repository.update(product_id, product_data)
         if not product:

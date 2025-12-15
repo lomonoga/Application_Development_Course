@@ -1,12 +1,11 @@
-import pytest
-from unittest.mock import Mock, AsyncMock, patch
-from uuid import uuid4
 from datetime import datetime
+from unittest.mock import AsyncMock, Mock, patch
+from uuid import uuid4
 
+import pytest
 from litestar.exceptions import NotFoundException
-
 from product_service import ProductService
-from schemas import ProductUpdate, ProductCreate
+from schemas import ProductCreate, ProductUpdate
 
 
 class TestProductService:
@@ -21,12 +20,12 @@ class TestProductService:
             "category": "Electronics",
             "in_stock": True,
             "created_at": datetime.now(),
-            "updated_at": datetime.now()
+            "updated_at": datetime.now(),
         }
         mock_product = Mock(**product_data)
         mock_repo.get_by_id.return_value = mock_product
 
-        with patch('schemas.ProductResponse.model_validate') as mock_validate:
+        with patch("schemas.ProductResponse.model_validate") as mock_validate:
             mock_response = Mock()
             for key, value in product_data.items():
                 setattr(mock_response, key, value)
@@ -57,20 +56,20 @@ class TestProductService:
                 "name": "Product 1",
                 "price": 50.0,
                 "category": "Books",
-                "in_stock": True
+                "in_stock": True,
             },
             {
                 "id": uuid4(),
                 "name": "Product 2",
                 "price": 75.0,
                 "category": "Books",
-                "in_stock": False
-            }
+                "in_stock": False,
+            },
         ]
         mock_products = [Mock(**data) for data in products_data]
         mock_repo.get_by_filter.return_value = mock_products
 
-        with patch('schemas.ProductResponse.model_validate') as mock_validate:
+        with patch("schemas.ProductResponse.model_validate") as mock_validate:
             mock_responses = []
             for data in products_data:
                 mock_response = Mock()
@@ -84,7 +83,9 @@ class TestProductService:
             result = await service.get_by_filter(category="Books")
 
             assert len(result) == 2
-            mock_repo.get_by_filter.assert_called_once_with(count=10, page=1, category="Books")
+            mock_repo.get_by_filter.assert_called_once_with(
+                count=10, page=1, category="Books"
+            )
 
     @pytest.mark.asyncio
     async def test_get_total_count(self):
@@ -105,12 +106,12 @@ class TestProductService:
             "name": "New Product",
             "price": 200.0,
             "category": "Home",
-            "in_stock": True
+            "in_stock": True,
         }
         mock_product = Mock(**product_data_dict)
         mock_repo.create.return_value = mock_product
 
-        with patch('schemas.ProductResponse.model_validate') as mock_validate:
+        with patch("schemas.ProductResponse.model_validate") as mock_validate:
             mock_response = Mock()
             for key, value in product_data_dict.items():
                 setattr(mock_response, key, value)
@@ -118,9 +119,7 @@ class TestProductService:
 
             service = ProductService(repository=mock_repo)
             product_data = ProductCreate(
-                name="New Product",
-                price=200.0,
-                category="Home"
+                name="New Product", price=200.0, category="Home"
             )
             result = await service.create(product_data)
 
@@ -136,12 +135,12 @@ class TestProductService:
             "name": "Updated Product",
             "price": 150.0,
             "category": "Updated",
-            "in_stock": False
+            "in_stock": False,
         }
         mock_product = Mock(**product_data_dict)
         mock_repo.update.return_value = mock_product
 
-        with patch('schemas.ProductResponse.model_validate') as mock_validate:
+        with patch("schemas.ProductResponse.model_validate") as mock_validate:
             mock_response = Mock()
             for key, value in product_data_dict.items():
                 setattr(mock_response, key, value)
