@@ -11,13 +11,13 @@ services:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
-    networks:
-      - postgres_network
     healthcheck:
       test: [ "CMD-SHELL", "pg_isready -U postgres" ]
       interval: 5s
       timeout: 5s
       retries: 5
+    networks:
+      - uni_network
 
   rabbitmq:
     image: rabbitmq:3-management
@@ -28,19 +28,24 @@ services:
       - RABBITMQ_DEFAULT_VHOST=local
     volumes:
       - rabbitmq_data:/data
+    networks:
+      - uni_network
 
   redis:
     image: redis:latest
-    container_name: redis_
+    container_name: redis
     ports:
       - "6379:6379"
     volumes:
       - redis_data:/data
+    networks:
+      - uni_network
 
   web:
     build: .
     environment:
-      - DATABASE_URL=postgresql+asyncpg://postgres:postgres@postgres:5432/postgres
+      DATABASE_URL: postgresql+asyncpg://postgres:postgres@postgres:5432/postgres
+      REDIS_HOST: redis
     ports:
       - "8001:8001"
     depends_on:
@@ -48,13 +53,15 @@ services:
         condition: service_healthy
       rabbitmq:
         condition: service_started
+      redis:
+        condition: service_started
 
     volumes:
       - ./alembic:/app/alembic
       - ./migrations:/app/migrations
       - .:/app
     networks:
-      - postgres_network
+      - uni_network
     command: uvicorn main:app --host 0.0.0.0 --port 8001 --reload
 
 volumes:
@@ -63,5 +70,5 @@ volumes:
   redis_data:
 
 networks:
-  postgres_network:
+  uni_network:
     driver: bridge

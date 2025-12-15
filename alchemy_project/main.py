@@ -88,7 +88,7 @@ async def provide_order_item_service(
 
 
 cors_config = CORSConfig(
-    allow_origins=["http://localhost:8001", "http://127.0.0.1:8001"],
+    allow_origins=["http://localhost:8001", "http://127.0.0.1:8001, http://localhost:6379", "http://127.0.0.1:6379"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
