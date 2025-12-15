@@ -6,9 +6,9 @@ from uuid import UUID
 from user_service import UserService
 from schemas import UserCreate, UserUpdate, UserResponse, UsersResponse
 
-
 class UserController(Controller):
     path = "/users"
+    tags = ["User Management"]
 
     @get("/get_user/{user_id:uuid}")
     async def get_user_by_id(
