@@ -104,10 +104,10 @@ class Order(Base):
         default=uuid4,
     )
     user_id: Mapped[UUID] = mapped_column(
-        ForeignKey("users.id", ondelete="CASCADE"), nullable=False
+        ForeignKey("users.id", ondelete="CASCADE"), nullable=True
     )
     delivery_address_id: Mapped[UUID] = mapped_column(
-        ForeignKey("addresses.id", ondelete="CASCADE"), nullable=False
+        ForeignKey("addresses.id", ondelete="CASCADE"), nullable=True
     )
     status: Mapped[str] = mapped_column(String(20), default="pending")
     total_amount: Mapped[float] = mapped_column(nullable=False, default=0.0)
